@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Auction {
+  id            String        @id @default(uuid())
+  itemId        String        @map("item_id")
+  startTime     DateTime      @map("start_time")
+  endTime       DateTime      @map("end_time")
+  status        AuctionStatus @default(SCHEDULED)
+  startingPrice Decimal       @map("starting_price") @db.Decimal(15, 2)
+  finalPrice    Decimal?      @map("final_price") @db.Decimal(15, 2)
+  winnerUserId  String?       @map("winner_user_id")
+  createdBy     String        @map("created_by")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  bids         Bid[]
+  transactions Transaction[]
+  histories    UserAuctionHistory[]
+
+  @@map("auctions")
+}
+
+model Bid {
+  id        String   @id @default(uuid())
+  auctionId String   @map("auction_id")
+  userId    String   @map("user_id")
+  bidAmount Decimal  @map("bid_amount") @db.Decimal(15, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  auction Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  @@map("bids")
+}
+
+model UserAuctionHistory {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  auctionId     String   @map("auction_id")
+  lastBidAmount Decimal  @map("last_bid_amount") @db.Decimal(15, 2)
+  isWinner      Boolean  @default(false) @map("is_winner")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  auction Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  @@map("user_auction_history")
+}
+
+model Transaction {
+  id            String            @id @default(uuid())
+  auctionId     String            @map("auction_id")
+  userId        String            @map("user_id")
+  amount        Decimal           @db.Decimal(15, 2)
+  status        TransactionStatus @default(PENDING)
+  paymentMethod String?           @map("payment_method")
+  paidAt        DateTime?         @map("paid_at")
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  auction Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+enum AuctionStatus {
+  SCHEDULED
+  ONGOING
+  FINISHED
+}
+
+enum TransactionStatus {
+  PENDING
+  PAID
+  FAILED
+}

@@ -1,0 +1,14 @@
+{
+  "workspace": {
+    "id": "1ccfe3d8-897e-4f8c-8853-8342883fbe2b"
+  },
+  "entities": {
+    "collections": [
+      "../BidHouse_Postman_Collection.json"
+    ],
+    "environments": [],
+    "specs": [],
+    "flows": [],
+    "globals": []
+  }
+}
