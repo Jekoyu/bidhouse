@@ -189,6 +189,20 @@
               }
             },
             {
+              "name": "Get My Items",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/items/my",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "items", "my"]
+                }
+              }
+            },
+            {
               "name": "Get Item Detail",
               "request": {
                 "method": "GET",
@@ -316,6 +330,30 @@
           }
         },
         {
+          "name": "Get My Won Auctions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/auctions/won",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auctions", "won"]
+            }
+          }
+        },
+        {
+          "name": "Get Participating Auctions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/auctions/participating",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auctions", "participating"]
+            }
+          }
+        },
+        {
           "name": "Get Auction Detail",
           "request": {
             "method": "GET",
@@ -371,6 +409,18 @@
               "raw": "{{base_url}}/api/auctions/{{auctionId}}/start",
               "host": ["{{base_url}}"],
               "path": ["api", "auctions", "{{auctionId}}", "start"]
+            }
+          }
+        },
+        {
+          "name": "Get My Bids",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/bids/my",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bids", "my"]
             }
           }
         },
