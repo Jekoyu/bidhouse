@@ -234,6 +234,63 @@ POST /transactions/:id/pay
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3000/api
+NEXT_PUBLIC_SOCKET_URL=http://localhost:3003
+```
+
+---
+
+## 🔌 WebSocket (Real-time)
+
+**Socket URL:** `http://localhost:3003` (Auction Service langsung, bukan via Gateway)
+
+### Connection
+
+```javascript
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:3003", {
+  auth: { token: "Bearer <jwt-token>" },
+});
+```
+
+### Join/Leave Auction Room
+
+```javascript
+// Subscribe ke auction tertentu
+socket.emit("join-auction", auctionId);
+
+// Unsubscribe
+socket.emit("leave-auction", auctionId);
+```
+
+### Events dari Server
+
+| Event              | Payload                                           | Deskripsi       |
+| ------------------ | ------------------------------------------------- | --------------- |
+| `auction:new-bid`  | `{ auctionId, bidId, amount, userId, timestamp }` | Ada bid baru    |
+| `auction:started`  | `{ auctionId, timestamp }`                        | Auction dimulai |
+| `auction:finished` | `{ auctionId, winnerId, finalPrice, timestamp }`  | Auction selesai |
+| `user:outbid`      | `{ auctionId, newAmount, message }`               | Anda di-outbid! |
+| `user:won-auction` | `{ auctionId, finalPrice, message }`              | Anda menang!    |
+
+### Example Usage (React)
+
+```javascript
+useEffect(() => {
+  socket.on("auction:new-bid", (data) => {
+    console.log("New bid:", data.amount);
+    setCurrentBid(data.amount);
+  });
+
+  socket.on("user:outbid", (data) => {
+    alert(data.message);
+  });
+
+  return () => {
+    socket.off("auction:new-bid");
+    socket.off("user:outbid");
+  };
+}, []);
 ```
 
 ---
