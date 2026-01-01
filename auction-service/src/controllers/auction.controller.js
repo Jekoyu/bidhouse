@@ -4,8 +4,13 @@ import { logActivity } from '../../../shared/utils/activityLogger.js';
 
 export const getAll = async (req, res, next) => {
   try {
-    const auctions = await auctionService.getAllAuctions(req.query);
-    res.status(200).json(successResponse('Auctions retrieved', auctions));
+    const result = await auctionService.getAllAuctions(req.query);
+    res.status(200).json({
+      success: true,
+      message: 'Auctions retrieved',
+      data: result.data,
+      pagination: result.pagination
+    });
   } catch (error) {
     next(error);
   }
