@@ -15,6 +15,7 @@ const checkAdmin = (req, res, next) => {
 };
 
 router.get('/', authMiddleware, itemController.getAll);
+router.get('/my', authMiddleware, itemController.getMy);
 router.get('/:id', authMiddleware, itemController.getDetail);
 router.post('/', authMiddleware, itemController.create);
 router.put('/:id', authMiddleware, itemController.update);

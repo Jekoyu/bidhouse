@@ -20,3 +20,12 @@ export const placeBid = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getMyBids = async (req, res, next) => {
+  try {
+    const bids = await bidService.getMyBids(req.user.id);
+    res.status(200).json(successResponse('My bids retrieved', bids));
+  } catch (error) {
+    next(error);
+  }
+};

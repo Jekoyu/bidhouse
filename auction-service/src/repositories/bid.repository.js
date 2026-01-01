@@ -36,3 +36,22 @@ export const findHighestBid = async (auctionId) => {
     orderBy: { bidAmount: 'desc' }
   });
 };
+
+export const findByUserId = async (userId) => {
+  return prisma.bid.findMany({
+    where: { userId },
+    include: {
+      auction: {
+        select: {
+          id: true,
+          itemId: true,
+          status: true,
+          startingPrice: true,
+          finalPrice: true,
+          endTime: true
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+};

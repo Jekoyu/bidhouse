@@ -15,6 +15,10 @@ export const getAllItems = async (filters = {}) => {
   return itemRepository.findAll(filters);
 };
 
+export const getMyItems = async (userId) => {
+  return itemRepository.findByUserId(userId);
+};
+
 export const getItemDetail = async (id) => {
   const item = await itemRepository.findById(id);
   if (!item) {

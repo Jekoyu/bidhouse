@@ -192,6 +192,13 @@ describe("BidHouse E2E Integration Tests", () => {
             expect(res.status).toBe(200);
         });
 
+        test("Get my items - should succeed", async () => {
+            const res = await request("GET", "/items/my", null, userToken);
+            expect(res.status).toBe(200);
+            const data = await res.json();
+            expect(Array.isArray(data.data)).toBe(true);
+        });
+
         test("Get item detail - should succeed", async () => {
             const res = await request("GET", `/items/${itemId}`, null, userToken);
             expect(res.status).toBe(200);
@@ -282,6 +289,27 @@ describe("BidHouse E2E Integration Tests", () => {
             const data = await res.json();
             expect(data.data.status).toBe("FINISHED");
             expect(data.data.winnerUserId).toBeDefined();
+        });
+
+        test("Get my bids - should succeed", async () => {
+            const res = await request("GET", "/bids/my", null, userToken);
+            expect(res.status).toBe(200);
+            const data = await res.json();
+            expect(Array.isArray(data.data)).toBe(true);
+        });
+
+        test("Get won auctions - should succeed", async () => {
+            const res = await request("GET", "/auctions/won", null, userToken);
+            expect(res.status).toBe(200);
+            const data = await res.json();
+            expect(Array.isArray(data.data)).toBe(true);
+        });
+
+        test("Get participating auctions - should succeed", async () => {
+            const res = await request("GET", "/auctions/participating", null, userToken);
+            expect(res.status).toBe(200);
+            const data = await res.json();
+            expect(Array.isArray(data.data)).toBe(true);
         });
     });
 

@@ -73,3 +73,21 @@ export const finish = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getWon = async (req, res, next) => {
+  try {
+    const auctions = await auctionService.getWonAuctions(req.user.id);
+    res.status(200).json(successResponse('Won auctions retrieved', auctions));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getParticipating = async (req, res, next) => {
+  try {
+    const auctions = await auctionService.getParticipatingAuctions(req.user.id);
+    res.status(200).json(successResponse('Participating auctions retrieved', auctions));
+  } catch (error) {
+    next(error);
+  }
+};
