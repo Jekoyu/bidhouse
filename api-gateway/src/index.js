@@ -47,6 +47,10 @@ const createServiceProxy = (target) => createProxyMiddleware({
 app.use('/api/auth/me', jwtMiddleware);
 app.use('/api/auth', createServiceProxy(AUTH_SERVICE_URL));
 
+// 1b. User Management Routes (Admin Only)
+app.use('/api/users', jwtMiddleware, roleMiddleware(['ADMIN']));
+app.use('/api/users', createServiceProxy(AUTH_SERVICE_URL));
+
 // 2. Masterdata Service Routes
 app.use('/api/items', jwtMiddleware);
 app.use('/api/items', createServiceProxy(MASTERDATA_SERVICE_URL));

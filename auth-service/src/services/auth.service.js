@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 const JWT_EXPIRY = process.env.JWT_EXPIRY || '24h';
 
 export const register = async (userData) => {
-  const { email, phone, password, name, role } = userData;
+  const { email, phone, password, name } = userData;
 
   // Check if user exists
   const existingEmail = await userRepository.findByEmail(email);
@@ -27,13 +27,14 @@ export const register = async (userData) => {
   // Hash password
   const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
-  // Create user
+  // Create user - force role to USER for public registration
+  // Admin accounts should only be created via seeder or direct database access
   const user = await userRepository.create({
     name,
     email,
     phone,
     password: hashedPassword,
-    role: role || 'USER'
+    role: 'USER' // Always USER for public registration
   });
 
   // Remove password from response

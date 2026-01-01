@@ -30,3 +30,24 @@ export const update = async (id, userData) => {
     data: userData
   });
 };
+
+export const findAll = async () => {
+  return prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+};
+
+export const remove = async (id) => {
+  return prisma.user.delete({
+    where: { id }
+  });
+};
