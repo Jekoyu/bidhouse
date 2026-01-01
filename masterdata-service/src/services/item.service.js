@@ -44,9 +44,9 @@ export const updateItem = async (id, data, user) => {
     throw error;
   }
 
-  // Approved items cannot be edited by user
-  if (item.status === 'APPROVED' && user.role !== 'ADMIN') {
-    const error = new Error('Approved items cannot be edited');
+  // APPROVED or REJECTED items cannot be edited by user (only admin)
+  if ((item.status === 'APPROVED' || item.status === 'REJECTED') && user.role !== 'ADMIN') {
+    const error = new Error('Cannot edit approved or rejected items');
     error.statusCode = 400;
     throw error;
   }
@@ -81,6 +81,13 @@ export const deleteItem = async (id, user) => {
   if (item.createdBy !== user.id && user.role !== 'ADMIN') {
     const error = new Error('Forbidden');
     error.statusCode = 403;
+    throw error;
+  }
+
+  // APPROVED or REJECTED items cannot be deleted by user (only admin)
+  if ((item.status === 'APPROVED' || item.status === 'REJECTED') && user.role !== 'ADMIN') {
+    const error = new Error('Cannot delete approved or rejected items');
+    error.statusCode = 400;
     throw error;
   }
 

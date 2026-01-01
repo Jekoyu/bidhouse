@@ -3,8 +3,8 @@ import * as userRepository from '../repositories/user.repository.js';
 
 const BCRYPT_SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
 
-export const getAllUsers = async () => {
-  return userRepository.findAll();
+export const getAllUsers = async (params) => {
+  return userRepository.findAll(params);
 };
 
 export const getUserById = async (id) => {

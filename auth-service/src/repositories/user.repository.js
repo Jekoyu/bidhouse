@@ -31,19 +31,49 @@ export const update = async (id, userData) => {
   });
 };
 
-export const findAll = async () => {
-  return prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-      role: true,
-      createdAt: true,
-      updatedAt: true
-    },
-    orderBy: { createdAt: 'desc' }
-  });
+export const findAll = async ({ search, role, page = 1, limit = 10 } = {}) => {
+  const skip = (page - 1) * limit;
+  const where = {};
+
+  if (role) {
+    where.role = role;
+  }
+
+  if (search) {
+    where.OR = [
+      { name: { contains: search } },
+      { email: { contains: search } }
+    ];
+  }
+
+  const [data, total] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true
+      },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: parseInt(limit)
+    }),
+    prisma.user.count({ where })
+  ]);
+
+  return {
+    data,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total,
+      totalPages: Math.ceil(total / limit)
+    }
+  };
 };
 
 export const remove = async (id) => {

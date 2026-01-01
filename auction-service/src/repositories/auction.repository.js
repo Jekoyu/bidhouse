@@ -1,10 +1,38 @@
 import prisma from '../prisma.js';
 
-export const findAll = async (filters = {}) => {
-  return prisma.auction.findMany({
-    where: filters,
-    orderBy: { createdAt: 'desc' }
-  });
+export const findAll = async ({ status, page = 1, limit = 10 } = {}) => {
+  const skip = (page - 1) * limit;
+  const where = {};
+
+  if (status) {
+    where.status = status;
+  }
+
+  const [data, total] = await Promise.all([
+    prisma.auction.findMany({
+      where,
+      include: {
+        bids: {
+          orderBy: { bidAmount: 'desc' },
+          take: 1
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: parseInt(limit)
+    }),
+    prisma.auction.count({ where })
+  ]);
+
+  return {
+    data,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total,
+      totalPages: Math.ceil(total / limit)
+    }
+  };
 };
 
 export const findById = async (id) => {

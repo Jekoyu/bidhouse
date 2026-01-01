@@ -1,17 +1,49 @@
 import prisma from '../prisma.js';
 
-export const findAll = async (filters = {}) => {
-  return prisma.item.findMany({
-    where: filters,
-    include: {
-      images: true,
-      categories: {
-        include: {
-          category: true
+export const findAll = async ({ search, status, page = 1, limit = 10 } = {}) => {
+  const skip = (page - 1) * limit;
+  const where = {};
+
+  // Filter by status
+  if (status) {
+    where.status = status;
+  }
+
+  // Search by name or description
+  if (search) {
+    where.OR = [
+      { name: { contains: search } },
+      { description: { contains: search } }
+    ];
+  }
+
+  const [data, total] = await Promise.all([
+    prisma.item.findMany({
+      where,
+      include: {
+        images: true,
+        categories: {
+          include: {
+            category: true
+          }
         }
-      }
+      },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: parseInt(limit)
+    }),
+    prisma.item.count({ where })
+  ]);
+
+  return {
+    data,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total,
+      totalPages: Math.ceil(total / limit)
     }
-  });
+  };
 };
 
 export const findByUserId = async (userId) => {

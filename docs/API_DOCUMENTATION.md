@@ -41,6 +41,34 @@ Authorization: Bearer <token>
 
 ---
 
+## � Pagination & Filtering
+
+Endpoints dengan list (getAll) mendukung query parameters berikut:
+
+| Endpoint    | Query Params                        | Contoh                                           |
+| ----------- | ----------------------------------- | ------------------------------------------------ |
+| `/items`    | `search`, `status`, `page`, `limit` | `?search=camera&status=APPROVED&page=1&limit=10` |
+| `/auctions` | `status`, `page`, `limit`           | `?status=ONGOING&page=1&limit=10`                |
+| `/users`    | `search`, `role`, `page`, `limit`   | `?search=john&role=ADMIN&page=1`                 |
+
+**Response format dengan pagination:**
+
+```json
+{
+  "success": true,
+  "message": "Items retrieved",
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 45,
+    "totalPages": 5
+  }
+}
+```
+
+---
+
 ## 🔷 Auth Service
 
 | Method | Endpoint         | Auth | Deskripsi              |
@@ -57,10 +85,11 @@ POST /auth/register
   "name": "John Doe",
   "email": "john@example.com",
   "phone": "08123456789",
-  "password": "password123",
-  "role": "USER"  // atau "ADMIN"
+  "password": "password123"
 }
 ```
+
+> ⚠️ **Note:** Role selalu `USER`. Untuk buat Admin, gunakan `/api/users` (Admin only).
 
 ### Login
 
@@ -83,11 +112,36 @@ POST /auth/login
 
 ---
 
+## � User Management (Admin Only)
+
+| Method | Endpoint     | Auth     | Deskripsi                   |
+| ------ | ------------ | -------- | --------------------------- |
+| GET    | `/users`     | ✅ Admin | List semua user (paginated) |
+| GET    | `/users/:id` | ✅ Admin | Detail user                 |
+| POST   | `/users`     | ✅ Admin | **Buat user (bisa ADMIN!)** |
+| PUT    | `/users/:id` | ✅ Admin | Update user                 |
+| DELETE | `/users/:id` | ✅ Admin | Hapus user                  |
+
+### Create User (Admin Only)
+
+```json
+POST /users
+{
+  "name": "New Admin",
+  "email": "admin2@bidhouse.com",
+  "phone": "08123456789",
+  "password": "password123",
+  "role": "ADMIN"  // atau "USER"
+}
+```
+
+---
+
 ## 📦 Item Service (Masterdata)
 
 | Method | Endpoint             | Auth | Role  | Deskripsi                |
 | ------ | -------------------- | ---- | ----- | ------------------------ |
-| GET    | `/items`             | ✅   | Any   | Semua item               |
+| GET    | `/items`             | ✅   | Any   | Semua item (paginated)   |
 | GET    | `/items/my`          | ✅   | Any   | Item milik saya          |
 | GET    | `/items/:id`         | ✅   | Any   | Detail item              |
 | POST   | `/items`             | ✅   | Any   | Buat item baru (PENDING) |
@@ -113,6 +167,12 @@ POST /items
 
 **Status Flow:** `PENDING` → `APPROVED` / `REJECTED`
 
+> ⚠️ **Edit/Delete Rules:**
+>
+> - `PENDING` → Owner bisa edit/delete ✅
+> - `APPROVED` → Owner TIDAK bisa edit/delete ❌ (Admin only)
+> - `REJECTED` → Owner TIDAK bisa edit/delete ❌ (Admin only)
+
 ---
 
 ## 📁 Category Service
@@ -127,15 +187,15 @@ POST /items
 
 ## 🔨 Auction Service
 
-| Method | Endpoint                  | Auth | Role  | Deskripsi                |
-| ------ | ------------------------- | ---- | ----- | ------------------------ |
-| GET    | `/auctions`               | ✅   | Any   | Semua auction            |
-| GET    | `/auctions/won`           | ✅   | Any   | Auction yang dimenangkan |
-| GET    | `/auctions/participating` | ✅   | Any   | Auction yang diikuti     |
-| GET    | `/auctions/:id`           | ✅   | Any   | Detail auction           |
-| POST   | `/auctions`               | ✅   | Admin | Jadwalkan auction        |
-| POST   | `/auctions/:id/start`     | ✅   | Admin | Mulai auction            |
-| POST   | `/auctions/:id/finish`    | ✅   | Admin | Selesaikan auction       |
+| Method | Endpoint                  | Auth | Role  | Deskripsi                 |
+| ------ | ------------------------- | ---- | ----- | ------------------------- |
+| GET    | `/auctions`               | ✅   | Any   | Semua auction (paginated) |
+| GET    | `/auctions/won`           | ✅   | Any   | Auction yang dimenangkan  |
+| GET    | `/auctions/participating` | ✅   | Any   | Auction yang diikuti      |
+| GET    | `/auctions/:id`           | ✅   | Any   | Detail auction            |
+| POST   | `/auctions`               | ✅   | Admin | Jadwalkan auction         |
+| POST   | `/auctions/:id/start`     | ✅   | Admin | Mulai auction             |
+| POST   | `/auctions/:id/finish`    | ✅   | Admin | Selesaikan auction        |
 
 ### Schedule Auction (Admin)
 
@@ -151,7 +211,7 @@ POST /auctions
 
 **Status Flow:** `SCHEDULED` → `ONGOING` → `FINISHED`
 
-> ⏰ **Auto-Scheduling:** Auction akan otomatis `ONGOING` saat `startTime` dan otomatis `FINISHED` saat `endTime` via cron job.
+> ⏰ **Auto-Scheduling:** Auction otomatis `ONGOING` saat `startTime` dan `FINISHED` saat `endTime` via cron job.
 
 ---
 
@@ -213,7 +273,7 @@ POST /transactions/:id/pay
 
 ```json
 // 400 Bad Request
-{ "success": false, "message": "Validation error", "errors": {...} }
+{ "success": false, "message": "Validation error" }
 
 // 401 Unauthorized
 { "success": false, "message": "Unauthorized" }
@@ -241,7 +301,7 @@ NEXT_PUBLIC_SOCKET_URL=http://localhost:3003
 
 ## 🔌 WebSocket (Real-time)
 
-**Socket URL:** `http://localhost:3003` (Auction Service langsung, bukan via Gateway)
+**Socket URL:** `http://localhost:3003` (Direct ke Auction Service)
 
 ### Connection
 
@@ -256,10 +316,7 @@ const socket = io("http://localhost:3003", {
 ### Join/Leave Auction Room
 
 ```javascript
-// Subscribe ke auction tertentu
 socket.emit("join-auction", auctionId);
-
-// Unsubscribe
 socket.emit("leave-auction", auctionId);
 ```
 
@@ -273,26 +330,6 @@ socket.emit("leave-auction", auctionId);
 | `user:outbid`      | `{ auctionId, newAmount, message }`               | Anda di-outbid! |
 | `user:won-auction` | `{ auctionId, finalPrice, message }`              | Anda menang!    |
 
-### Example Usage (React)
-
-```javascript
-useEffect(() => {
-  socket.on("auction:new-bid", (data) => {
-    console.log("New bid:", data.amount);
-    setCurrentBid(data.amount);
-  });
-
-  socket.on("user:outbid", (data) => {
-    alert(data.message);
-  });
-
-  return () => {
-    socket.off("auction:new-bid");
-    socket.off("user:outbid");
-  };
-}, []);
-```
-
 ---
 
 ## 📱 Recommended FE Pages
@@ -304,4 +341,4 @@ useEffect(() => {
 5. **My Bids:** User's bid history
 6. **My Auctions:** Won + participating
 7. **Transactions:** Payment list
-8. **Admin Panel:** Approve items, manage auctions
+8. **Admin Panel:** Approve items, manage auctions, manage users

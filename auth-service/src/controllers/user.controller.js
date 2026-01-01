@@ -3,8 +3,13 @@ import { successResponse } from '../../../shared/utils/response.js';
 
 export const getAll = async (req, res, next) => {
   try {
-    const users = await userService.getAllUsers();
-    res.status(200).json(successResponse('Users retrieved', users));
+    const result = await userService.getAllUsers(req.query);
+    res.status(200).json({
+      success: true,
+      message: 'Users retrieved',
+      data: result.data,
+      pagination: result.pagination
+    });
   } catch (error) {
     next(error);
   }
