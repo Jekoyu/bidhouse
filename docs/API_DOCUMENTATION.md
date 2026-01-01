@@ -160,7 +160,7 @@ POST /items
   "startingPrice": 500000,
   "categories": ["category-uuid"],
   "images": [
-    { "url": "https://...", "isPrimary": true }
+    { "url": "https://s3.jekoyu.dev/bidhouse/items/xxx.jpg", "isPrimary": true }
   ]
 }
 ```
@@ -172,6 +172,59 @@ POST /items
 > - `PENDING` → Owner bisa edit/delete ✅
 > - `APPROVED` → Owner TIDAK bisa edit/delete ❌ (Admin only)
 > - `REJECTED` → Owner TIDAK bisa edit/delete ❌ (Admin only)
+
+---
+
+## 📤 Upload Service
+
+| Method | Endpoint           | Auth | Deskripsi                  |
+| ------ | ------------------ | ---- | -------------------------- |
+| POST   | `/upload/single`   | ✅   | Upload satu file           |
+| POST   | `/upload/multiple` | ✅   | Upload banyak file (max 5) |
+
+### Upload Single File
+
+```
+POST /upload/single
+Content-Type: multipart/form-data
+
+file: <image file>
+folder: items  (optional, default: items)
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "url": "https://s3.jekoyu.dev/bidhouse/items/abc123.jpg",
+    "key": "items/abc123.jpg"
+  }
+}
+```
+
+### Upload Multiple Files
+
+```
+POST /upload/multiple
+Content-Type: multipart/form-data
+
+files: <image files> (max 5)
+folder: items  (optional)
+```
+
+### Upload Flow untuk Item:
+
+```
+1. POST /upload/single → Dapat URL
+2. POST /items dengan URL dari langkah 1
+```
+
+**Constraints:**
+
+- Max file size: **5MB**
+- Allowed types: `jpeg`, `png`, `gif`, `webp`
 
 ---
 

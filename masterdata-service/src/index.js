@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import itemRoutes from './routes/item.routes.js';
 import categoryRoutes from './routes/category.routes.js';
+import uploadRoutes from './routes/upload.routes.js';
 import errorHandler from '../../shared/middleware/errorHandler.js';
 import Logger from '../../shared/utils/logger.js';
 
@@ -19,6 +20,7 @@ app.use(express.json());
 // Routes
 app.use('/api/items', itemRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

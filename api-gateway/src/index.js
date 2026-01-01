@@ -58,6 +58,9 @@ app.use('/api/items', createServiceProxy(MASTERDATA_SERVICE_URL));
 app.use('/api/categories', jwtMiddleware);
 app.use('/api/categories', createServiceProxy(MASTERDATA_SERVICE_URL));
 
+app.use('/api/upload', jwtMiddleware);
+app.use('/api/upload', createServiceProxy(MASTERDATA_SERVICE_URL));
+
 // 3. Auction Service Routes
 app.use('/api/auctions', jwtMiddleware);
 app.use('/api/auctions', createServiceProxy(AUCTION_SERVICE_URL));
