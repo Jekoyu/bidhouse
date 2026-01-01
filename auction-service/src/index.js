@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import auctionRoutes from './routes/auction.routes.js';
 import bidRoutes from './routes/bid.routes.js';
+import transactionRoutes from './routes/transaction.routes.js';
 import errorHandler from '../../shared/middleware/errorHandler.js';
 import Logger from '../../shared/utils/logger.js';
 
@@ -19,6 +20,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auctions', auctionRoutes);
 app.use('/api/bids', bidRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

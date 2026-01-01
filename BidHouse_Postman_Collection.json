@@ -408,6 +408,52 @@
       ]
     },
     {
+      "name": "Transaction Service",
+      "item": [
+        {
+          "name": "Get My Transactions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/transactions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"]
+            }
+          }
+        },
+        {
+          "name": "Get Transaction Detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/transactions/{{transactionId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "{{transactionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Pay Transaction",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"paymentMethod\": \"BANK_TRANSFER\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions/{{transactionId}}/pay",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "{{transactionId}}", "pay"]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Log Service",
       "item": [
         {
@@ -433,6 +479,7 @@
     { "key": "admin_token", "value": "", "type": "string" },
     { "key": "categoryId", "value": "", "type": "string" },
     { "key": "itemId", "value": "", "type": "string" },
-    { "key": "auctionId", "value": "", "type": "string" }
+    { "key": "auctionId", "value": "", "type": "string" },
+    { "key": "transactionId", "value": "", "type": "string" }
   ]
 }
