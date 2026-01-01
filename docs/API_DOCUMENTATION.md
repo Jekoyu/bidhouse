@@ -75,6 +75,7 @@ Endpoints dengan list (getAll) mendukung query parameters berikut:
 | ------ | ---------------- | ---- | ---------------------- |
 | POST   | `/auth/register` | ❌   | Registrasi user baru   |
 | POST   | `/auth/login`    | ❌   | Login, dapat token     |
+| POST   | `/auth/google`   | ❌   | Login via Google OAuth |
 | GET    | `/auth/me`       | ✅   | Profile user logged in |
 
 ### Register
