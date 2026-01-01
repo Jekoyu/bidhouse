@@ -11,6 +11,15 @@ export const getAll = async (req, res, next) => {
   }
 };
 
+export const getMy = async (req, res, next) => {
+  try {
+    const items = await itemService.getMyItems(req.user.id);
+    res.status(200).json(successResponse('My items retrieved', items));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getDetail = async (req, res, next) => {
   try {
     const item = await itemService.getItemDetail(req.params.id);

@@ -43,3 +43,41 @@ export const findAuctionWithHighestBid = async (id) => {
     }
   });
 };
+
+export const findWonByUserId = async (userId) => {
+  return prisma.auction.findMany({
+    where: {
+      winnerUserId: userId,
+      status: 'FINISHED'
+    },
+    include: {
+      transactions: true
+    },
+    orderBy: { updatedAt: 'desc' }
+  });
+};
+
+export const findParticipatingByUserId = async (userId) => {
+  // Find all auctions where user has placed at least one bid
+  const userBids = await prisma.bid.findMany({
+    where: { userId },
+    select: { auctionId: true },
+    distinct: ['auctionId']
+  });
+
+  const auctionIds = userBids.map(b => b.auctionId);
+
+  return prisma.auction.findMany({
+    where: {
+      id: { in: auctionIds }
+    },
+    include: {
+      bids: {
+        where: { userId },
+        orderBy: { bidAmount: 'desc' },
+        take: 1
+      }
+    },
+    orderBy: { endTime: 'desc' }
+  });
+};

@@ -40,3 +40,7 @@ export const placeBid = async (auctionId, userId, amount) => {
     bidAmount: amount
   });
 };
+
+export const getMyBids = async (userId) => {
+  return bidRepository.findByUserId(userId);
+};

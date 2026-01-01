@@ -14,6 +14,21 @@ export const findAll = async (filters = {}) => {
   });
 };
 
+export const findByUserId = async (userId) => {
+  return prisma.item.findMany({
+    where: { createdBy: userId },
+    include: {
+      images: true,
+      categories: {
+        include: {
+          category: true
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+};
+
 export const findById = async (id) => {
   return prisma.item.findUnique({
     where: { id },

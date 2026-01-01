@@ -4,6 +4,7 @@ import authMiddleware from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
+router.get('/my', authMiddleware, bidController.getMyBids);
 router.post('/', authMiddleware, bidController.placeBid);
 
 export default router;

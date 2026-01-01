@@ -77,3 +77,11 @@ export const finishAuction = async (id) => {
     return updatedAuction;
   });
 };
+
+export const getWonAuctions = async (userId) => {
+  return auctionRepository.findWonByUserId(userId);
+};
+
+export const getParticipatingAuctions = async (userId) => {
+  return auctionRepository.findParticipatingByUserId(userId);
+};
