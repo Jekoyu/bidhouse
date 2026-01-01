@@ -6,7 +6,6 @@ import jwtMiddleware from './middleware/jwt.middleware.js';
 import roleMiddleware from './middleware/role.middleware.js';
 import errorHandler from '../../shared/middleware/errorHandler.js';
 import Logger from '../../shared/utils/logger.js';
-// authRoutes removed for simplified routing directly in this file
 
 dotenv.config();
 
@@ -30,61 +29,44 @@ app.use((req, res, next) => {
   next();
 });
 
+// Proxy configuration helper - only applies fixRequestBody when there's a body
+const createServiceProxy = (target) => createProxyMiddleware({
+  target,
+  changeOrigin: true,
+  onProxyReq: (proxyReq, req, res) => {
+    // Only fix request body for methods that have body
+    if (req.body && Object.keys(req.body).length > 0) {
+      fixRequestBody(proxyReq, req, res);
+    }
+  }
+});
+
 // --- ROUTES ---
 
 // 1. Auth Service Routes
-// Special handling for /me which needs JWT, others are public
 app.use('/api/auth/me', jwtMiddleware);
-app.use('/api/auth', createProxyMiddleware({
-  target: AUTH_SERVICE_URL,
-  changeOrigin: true,
-  onProxyReq: fixRequestBody
-}));
+app.use('/api/auth', createServiceProxy(AUTH_SERVICE_URL));
 
 // 2. Masterdata Service Routes
 app.use('/api/items', jwtMiddleware);
-app.use('/api/items', createProxyMiddleware({
-  target: MASTERDATA_SERVICE_URL,
-  changeOrigin: true,
-  onProxyReq: fixRequestBody
-}));
+app.use('/api/items', createServiceProxy(MASTERDATA_SERVICE_URL));
 
 app.use('/api/categories', jwtMiddleware);
-app.use('/api/categories', createProxyMiddleware({
-  target: MASTERDATA_SERVICE_URL,
-  changeOrigin: true,
-  onProxyReq: fixRequestBody
-}));
+app.use('/api/categories', createServiceProxy(MASTERDATA_SERVICE_URL));
 
 // 3. Auction Service Routes
 app.use('/api/auctions', jwtMiddleware);
-app.use('/api/auctions', createProxyMiddleware({
-  target: AUCTION_SERVICE_URL,
-  changeOrigin: true,
-  onProxyReq: fixRequestBody
-}));
+app.use('/api/auctions', createServiceProxy(AUCTION_SERVICE_URL));
 
 app.use('/api/bids', jwtMiddleware);
-app.use('/api/bids', createProxyMiddleware({
-  target: AUCTION_SERVICE_URL,
-  changeOrigin: true,
-  onProxyReq: fixRequestBody
-}));
+app.use('/api/bids', createServiceProxy(AUCTION_SERVICE_URL));
 
 app.use('/api/transactions', jwtMiddleware);
-app.use('/api/transactions', createProxyMiddleware({
-  target: AUCTION_SERVICE_URL,
-  changeOrigin: true,
-  onProxyReq: fixRequestBody
-}));
+app.use('/api/transactions', createServiceProxy(AUCTION_SERVICE_URL));
 
 // 4. Log Service Routes (Admin Only)
 app.use('/api/logs', jwtMiddleware, roleMiddleware(['ADMIN']));
-app.use('/api/logs', createProxyMiddleware({
-  target: LOG_SERVICE_URL,
-  changeOrigin: true,
-  onProxyReq: fixRequestBody
-}));
+app.use('/api/logs', createServiceProxy(LOG_SERVICE_URL));
 
 // Health check
 app.get('/health', (req, res) => {
