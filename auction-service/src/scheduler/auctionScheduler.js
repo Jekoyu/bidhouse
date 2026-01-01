@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import prisma from '../prisma.js';
 import { logActivity } from '../../../shared/utils/activityLogger.js';
 import Logger from '../../../shared/utils/logger.js';
+import { emitAuctionStarted, emitAuctionFinished } from '../socket/socketServer.js';
 
 const logger = new Logger('AUCTION-SCHEDULER');
 
@@ -86,6 +87,9 @@ const finishExpiredAuctions = async () => {
           status: 'SUCCESS'
         });
 
+        // Emit real-time event
+        emitAuctionFinished(auction.id, highestBid?.userId || null, highestBid?.bidAmount || null);
+
         logger.info(`Auction ${auction.id} auto-finished. Winner: ${highestBid?.userId || 'No bids'}`);
       } catch (error) {
         logger.error(`Failed to finish auction ${auction.id}:`, { error: error.message });
@@ -130,6 +134,9 @@ const startScheduledAuctions = async () => {
         details: { auctionId: auction.id },
         status: 'SUCCESS'
       });
+
+      // Emit real-time event
+      emitAuctionStarted(auction.id);
 
       logger.info(`Auction ${auction.id} auto-started`);
     }

@@ -1,11 +1,25 @@
 import * as bidService from '../services/bid.service.js';
 import { successResponse } from '../../../shared/utils/response.js';
 import { logActivity } from '../../../shared/utils/activityLogger.js';
+import { emitNewBid, emitOutbid } from '../socket/socketServer.js';
+import * as bidRepository from '../repositories/bid.repository.js';
 
 export const placeBid = async (req, res, next) => {
   try {
     const { auctionId, amount } = req.body;
+    
+    // Get previous highest bidder before placing new bid
+    const previousHighest = await bidRepository.findHighestBid(auctionId);
+    
     const bid = await bidService.placeBid(auctionId, req.user.id, amount);
+
+    // Emit real-time events
+    emitNewBid(auctionId, bid);
+    
+    // Notify previous highest bidder they've been outbid
+    if (previousHighest && previousHighest.userId !== req.user.id) {
+      emitOutbid(previousHighest.userId, auctionId, amount);
+    }
 
     logActivity({
       service: 'AUCTION_SERVICE',
