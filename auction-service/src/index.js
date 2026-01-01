@@ -6,6 +6,7 @@ import bidRoutes from './routes/bid.routes.js';
 import transactionRoutes from './routes/transaction.routes.js';
 import errorHandler from '../../shared/middleware/errorHandler.js';
 import Logger from '../../shared/utils/logger.js';
+import { initScheduler } from './scheduler/auctionScheduler.js';
 
 dotenv.config();
 
@@ -33,4 +34,7 @@ app.use(errorHandler);
 // Start Server
 app.listen(PORT, () => {
   logger.info(`Auction Service running on port ${PORT}`);
+  
+  // Initialize auction scheduler
+  initScheduler();
 });
