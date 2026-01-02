@@ -20,6 +20,14 @@ const errorHandler = (err, req, res, next) => {
     errors = err.details || err.errors;
   }
 
+  if (err.name === 'MulterError') {
+    statusCode = 400;
+    message = `File Upload Error: ${err.message}`;
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      message = 'File size is too large (Max 5MB)';
+    }
+  }
+
   if (err.name === 'UnauthorizedError' || err.name === 'JsonWebTokenError') {
     statusCode = 401;
     message = 'Unauthorized';

@@ -13,11 +13,15 @@ const upload = multer({
   },
   fileFilter: (req, file, cb) => {
     // Allow only images
+    console.log(`[Upload Debug] Incoming file: ${file.originalname}, Mimetype: ${file.mimetype}`);
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed (jpeg, png, gif, webp)'), false);
+      console.log(`[Upload Debug] Rejected file type: ${file.mimetype}`);
+      const error = new Error(`Only image files are allowed. Received: ${file.mimetype}`);
+      error.statusCode = 400;
+      cb(error, false);
     }
   }
 });

@@ -1,13 +1,16 @@
 {
   "info": {
-    "_postman_id": "bidhouse-collection-v5",
-    "name": "BidHouse Microservices (All Routes)",
-    "description": "Comprehensive collection with ALL routes, automated variables, and full CRUD support.",
+    "_postman_id": "bidhouse-collection-v6",
+    "name": "BidHouse Microservices (Complete)",
+    "description": "Complete API collection with all endpoints, filters, pagination, OAuth, and file upload.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000", "type": "string" }
+  ],
   "item": [
     {
-      "name": "Auth Service",
+      "name": "🔐 Auth Service",
       "item": [
         {
           "name": "Register User",
@@ -16,7 +19,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john{{$randomInt}}@example.com\",\n    \"phone\": \"08{{$randomInt}}{{$randomInt}}\",\n    \"password\": \"password123\",\n    \"role\": \"USER\"\n}",
+              "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john{{$randomInt}}@example.com\",\n    \"phone\": \"08{{$randomInt}}{{$randomInt}}\",\n    \"password\": \"password123\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -35,7 +38,8 @@
                 "exec": [
                   "var jsonData = pm.response.json();",
                   "if (jsonData.success) {",
-                  "    pm.environment.set(\"token\", jsonData.data.token);",
+                  "    pm.collectionVariables.set(\"token\", jsonData.data.token);",
+                  "    pm.collectionVariables.set(\"user_id\", jsonData.data.user.id);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -66,7 +70,7 @@
                 "exec": [
                   "var jsonData = pm.response.json();",
                   "if (jsonData.success) {",
-                  "    pm.environment.set(\"admin_token\", jsonData.data.token);",
+                  "    pm.collectionVariables.set(\"admin_token\", jsonData.data.token);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -89,6 +93,23 @@
           }
         },
         {
+          "name": "Google Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"idToken\": \"<Google ID Token from Frontend>\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/google",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "google"]
+            }
+          }
+        },
+        {
           "name": "Get My Profile",
           "request": {
             "method": "GET",
@@ -103,219 +124,352 @@
       ]
     },
     {
-      "name": "Masterdata Service",
+      "name": "👥 User Management (Admin)",
       "item": [
         {
-          "name": "Category Management",
-          "item": [
-            {
-              "name": "Get All Categories",
-              "request": {
-                "method": "GET",
-                "header": [
-                  { "key": "Authorization", "value": "Bearer {{token}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/categories",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "categories"]
-                }
-              }
-            },
-            {
-              "name": "Get Category Detail",
-              "request": {
-                "method": "GET",
-                "header": [
-                  { "key": "Authorization", "value": "Bearer {{token}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/categories/{{categoryId}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "categories", "{{categoryId}}"]
-                }
-              }
-            },
-            {
-              "name": "Create Category (Admin)",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "var jsonData = pm.response.json();",
-                      "if (jsonData.success) {",
-                      "    pm.environment.set(\"categoryId\", jsonData.data.id);",
-                      "}"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"name\": \"Rare Antiques\",\n    \"description\": \"One of a kind antique items\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/categories",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "categories"]
-                }
-              }
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users?page=1&limit=10&search=&role=",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "" },
+                { "key": "role", "value": "" }
+              ]
             }
-          ]
+          }
         },
         {
-          "name": "Item Management",
-          "item": [
-            {
-              "name": "Get All Items",
-              "request": {
-                "method": "GET",
-                "header": [
-                  { "key": "Authorization", "value": "Bearer {{token}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/items",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "items"]
-                }
-              }
-            },
-            {
-              "name": "Get My Items",
-              "request": {
-                "method": "GET",
-                "header": [
-                  { "key": "Authorization", "value": "Bearer {{token}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/items/my",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "items", "my"]
-                }
-              }
-            },
-            {
-              "name": "Get Item Detail",
-              "request": {
-                "method": "GET",
-                "header": [
-                  { "key": "Authorization", "value": "Bearer {{token}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/items/{{itemId}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "items", "{{itemId}}"]
-                }
-              }
-            },
-            {
-              "name": "Create Item",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "var jsonData = pm.response.json();",
-                      "if (jsonData.success) {",
-                      "    pm.environment.set(\"itemId\", jsonData.data.id);",
-                      "}"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Authorization", "value": "Bearer {{token}}" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"name\": \"Vintage Camera Pro\",\n    \"description\": \"High end 1975 film camera\",\n    \"startingPrice\": 500.00,\n    \"categories\": [\"{{categoryId}}\"],\n    \"images\": [\n        { \"url\": \"https://example.com/cam_pro.jpg\", \"isPrimary\": true }\n    ]\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/items",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "items"]
-                }
-              }
-            },
-            {
-              "name": "Update Item",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  { "key": "Authorization", "value": "Bearer {{token}}" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"name\": \"Updated Vintage Camera\",\n    \"description\": \"Revised description for the camera\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/items/{{itemId}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "items", "{{itemId}}"]
-                }
-              }
-            },
-            {
-              "name": "Approve Item (Admin)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/items/{{itemId}}/approve",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "items", "{{itemId}}", "approve"]
-                }
-              }
-            },
-            {
-              "name": "Reject Item (Admin)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/items/{{itemId}}/reject",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "items", "{{itemId}}", "reject"]
-                }
-              }
-            },
-            {
-              "name": "Delete Item",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  { "key": "Authorization", "value": "Bearer {{token}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/items/{{itemId}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "items", "{{itemId}}"]
-                }
-              }
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{user_id}}"]
             }
-          ]
+          }
+        },
+        {
+          "name": "Create User (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"New Admin\",\n    \"email\": \"newadmin@bidhouse.com\",\n    \"phone\": \"08123456789\",\n    \"password\": \"password123\",\n    \"role\": \"ADMIN\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Name\",\n    \"role\": \"USER\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{user_id}}"]
+            }
+          }
         }
       ]
     },
     {
-      "name": "Auction Service",
+      "name": "📦 Items",
+      "item": [
+        {
+          "name": "Get All Items",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/items?page=1&limit=10&search=&status=",
+              "host": ["{{base_url}}"],
+              "path": ["api", "items"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "" },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "PENDING | APPROVED | REJECTED"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Items",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/items/my?page=1&limit=10&search=&status=",
+              "host": ["{{base_url}}"],
+              "path": ["api", "items", "my"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "" },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "PENDING | APPROVED | REJECTED"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Item Detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/items/{{item_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "items", "{{item_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success) {",
+                  "    pm.collectionVariables.set(\"item_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Vintage Camera\",\n    \"description\": \"1970s film camera in excellent condition\",\n    \"startingPrice\": 500000,\n    \"categories\": [],\n    \"images\": [\n        { \"url\": \"https://s3.jekoyu.dev/bidhouse/items/sample.jpg\", \"isPrimary\": true }\n    ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/items",
+              "host": ["{{base_url}}"],
+              "path": ["api", "items"]
+            }
+          }
+        },
+        {
+          "name": "Update Item",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Camera Name\",\n    \"description\": \"Updated description\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/items/{{item_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "items", "{{item_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Item",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/items/{{item_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "items", "{{item_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Approve Item (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/items/{{item_id}}/approve",
+              "host": ["{{base_url}}"],
+              "path": ["api", "items", "{{item_id}}", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Reject Item (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/items/{{item_id}}/reject",
+              "host": ["{{base_url}}"],
+              "path": ["api", "items", "{{item_id}}", "reject"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📤 Upload",
+      "item": [
+        {
+          "name": "Upload Single File",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": "" },
+                { "key": "folder", "value": "items", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/upload/single",
+              "host": ["{{base_url}}"],
+              "path": ["api", "upload", "single"]
+            }
+          }
+        },
+        {
+          "name": "Upload Multiple Files",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "files", "type": "file", "src": "" },
+                { "key": "folder", "value": "items", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/upload/multiple",
+              "host": ["{{base_url}}"],
+              "path": ["api", "upload", "multiple"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📁 Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Get Category Detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/categories/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", "{{category_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Category (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success) {",
+                  "    pm.collectionVariables.set(\"category_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Electronics\",\n    \"description\": \"Electronic devices and gadgets\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔨 Auctions",
       "item": [
         {
           "name": "Get All Auctions",
@@ -323,14 +477,23 @@
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
             "url": {
-              "raw": "{{base_url}}/api/auctions",
+              "raw": "{{base_url}}/api/auctions?page=1&limit=10&status=",
               "host": ["{{base_url}}"],
-              "path": ["api", "auctions"]
+              "path": ["api", "auctions"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "SCHEDULED | ONGOING | FINISHED"
+                }
+              ]
             }
           }
         },
         {
-          "name": "Get My Won Auctions",
+          "name": "Get Won Auctions",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -359,9 +522,9 @@
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
             "url": {
-              "raw": "{{base_url}}/api/auctions/{{auctionId}}",
+              "raw": "{{base_url}}/api/auctions/{{auction_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "auctions", "{{auctionId}}"]
+              "path": ["api", "auctions", "{{auction_id}}"]
             }
           }
         },
@@ -374,7 +537,7 @@
                 "exec": [
                   "var jsonData = pm.response.json();",
                   "if (jsonData.success) {",
-                  "    pm.environment.set(\"auctionId\", jsonData.data.id);",
+                  "    pm.collectionVariables.set(\"auction_id\", jsonData.data.id);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -388,7 +551,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"itemId\": \"{{itemId}}\",\n    \"startTime\": \"{{$isoTimestamp}}\",\n    \"endTime\": \"2026-01-02T10:00:00Z\",\n    \"startingPrice\": 200.00\n}",
+              "raw": "{\n    \"itemId\": \"{{item_id}}\",\n    \"startTime\": \"2026-01-03T10:00:00Z\",\n    \"endTime\": \"2026-01-03T12:00:00Z\",\n    \"startingPrice\": 500000\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -406,38 +569,9 @@
               { "key": "Authorization", "value": "Bearer {{admin_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/api/auctions/{{auctionId}}/start",
+              "raw": "{{base_url}}/api/auctions/{{auction_id}}/start",
               "host": ["{{base_url}}"],
-              "path": ["api", "auctions", "{{auctionId}}", "start"]
-            }
-          }
-        },
-        {
-          "name": "Get My Bids",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": {
-              "raw": "{{base_url}}/api/bids/my",
-              "host": ["{{base_url}}"],
-              "path": ["api", "bids", "my"]
-            }
-          }
-        },
-        {
-          "name": "Place Bid",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"auctionId\": \"{{auctionId}}\",\n    \"amount\": 300.00\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/bids",
-              "host": ["{{base_url}}"],
-              "path": ["api", "bids"]
+              "path": ["api", "auctions", "{{auction_id}}", "start"]
             }
           }
         },
@@ -449,16 +583,68 @@
               { "key": "Authorization", "value": "Bearer {{admin_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/api/auctions/{{auctionId}}/finish",
+              "raw": "{{base_url}}/api/auctions/{{auction_id}}/finish",
               "host": ["{{base_url}}"],
-              "path": ["api", "auctions", "{{auctionId}}", "finish"]
+              "path": ["api", "auctions", "{{auction_id}}", "finish"]
             }
           }
         }
       ]
     },
     {
-      "name": "Transaction Service",
+      "name": "💰 Bids",
+      "item": [
+        {
+          "name": "Get My Bids",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/bids/my?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bids", "my"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Place Bid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success) {",
+                  "    pm.collectionVariables.set(\"bid_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"auctionId\": \"{{auction_id}}\",\n    \"amount\": 600000\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bids",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bids"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 Transactions",
       "item": [
         {
           "name": "Get My Transactions",
@@ -478,9 +664,9 @@
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
             "url": {
-              "raw": "{{base_url}}/api/transactions/{{transactionId}}",
+              "raw": "{{base_url}}/api/transactions/{{transaction_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "transactions", "{{transactionId}}"]
+              "path": ["api", "transactions", "{{transaction_id}}"]
             }
           }
         },
@@ -495,19 +681,19 @@
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{base_url}}/api/transactions/{{transactionId}}/pay",
+              "raw": "{{base_url}}/api/transactions/{{transaction_id}}/pay",
               "host": ["{{base_url}}"],
-              "path": ["api", "transactions", "{{transactionId}}", "pay"]
+              "path": ["api", "transactions", "{{transaction_id}}", "pay"]
             }
           }
         }
       ]
     },
     {
-      "name": "Log Service",
+      "name": "📊 Logs (Admin)",
       "item": [
         {
-          "name": "Get Activity Logs (Admin)",
+          "name": "Get Activity Logs",
           "request": {
             "method": "GET",
             "header": [
@@ -522,14 +708,5 @@
         }
       ]
     }
-  ],
-  "variable": [
-    { "key": "base_url", "value": "http://localhost:3000", "type": "string" },
-    { "key": "token", "value": "", "type": "string" },
-    { "key": "admin_token", "value": "", "type": "string" },
-    { "key": "categoryId", "value": "", "type": "string" },
-    { "key": "itemId", "value": "", "type": "string" },
-    { "key": "auctionId", "value": "", "type": "string" },
-    { "key": "transactionId", "value": "", "type": "string" }
   ]
 }

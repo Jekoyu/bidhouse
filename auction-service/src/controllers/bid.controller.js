@@ -37,8 +37,13 @@ export const placeBid = async (req, res, next) => {
 
 export const getMyBids = async (req, res, next) => {
   try {
-    const bids = await bidService.getMyBids(req.user.id);
-    res.status(200).json(successResponse('My bids retrieved', bids));
+    const result = await bidService.getMyBids(req.user.id, req.query);
+    res.status(200).json({
+      success: true,
+      message: 'My bids retrieved',
+      data: result.data,
+      pagination: result.pagination
+    });
   } catch (error) {
     next(error);
   }

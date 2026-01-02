@@ -37,21 +37,38 @@ export const findHighestBid = async (auctionId) => {
   });
 };
 
-export const findByUserId = async (userId) => {
-  return prisma.bid.findMany({
-    where: { userId },
-    include: {
-      auction: {
-        select: {
-          id: true,
-          itemId: true,
-          status: true,
-          startingPrice: true,
-          finalPrice: true,
-          endTime: true
+export const findByUserId = async (userId, { page = 1, limit = 10 } = {}) => {
+  const skip = (page - 1) * limit;
+
+  const [data, total] = await Promise.all([
+    prisma.bid.findMany({
+      where: { userId },
+      include: {
+        auction: {
+          select: {
+            id: true,
+            itemId: true,
+            status: true,
+            startingPrice: true,
+            finalPrice: true,
+            endTime: true
+          }
         }
-      }
-    },
-    orderBy: { createdAt: 'desc' }
-  });
+      },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: parseInt(limit)
+    }),
+    prisma.bid.count({ where: { userId } })
+  ]);
+
+  return {
+    data,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total,
+      totalPages: Math.ceil(total / limit)
+    }
+  };
 };

@@ -1,6 +1,7 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
+import sharp from 'sharp';
 
 const s3Client = new S3Client({
   endpoint: process.env.S3_ENDPOINT || 'https://s3.jekoyu.dev',
@@ -16,22 +17,39 @@ const BUCKET_NAME = process.env.S3_BUCKET || 'bidhouse';
 const CDN_URL = process.env.S3_CDN_URL || 'https://s3.jekoyu.dev';
 
 /**
- * Upload a file to S3/MinIO
+ * Upload a file to S3/MinIO with auto-conversion to WebP for images
  * @param {Buffer} fileBuffer - The file buffer
  * @param {string} originalName - Original filename
  * @param {string} mimeType - File MIME type
- * @param {string} folder - Folder path in bucket (e.g., 'items', 'avatars')
+ * @param {string} folder - Folder path in bucket
  * @returns {Promise<{url: string, key: string}>}
  */
 export const uploadFile = async (fileBuffer, originalName, mimeType, folder = 'items') => {
-  const ext = path.extname(originalName);
-  const key = `${folder}/${uuidv4()}${ext}`;
+  let bufferToUpload = fileBuffer;
+  let contentType = mimeType;
+  let extension = path.extname(originalName);
+
+  // Auto-convert images to WebP
+  if (mimeType.startsWith('image/')) {
+    try {
+      bufferToUpload = await sharp(fileBuffer)
+        .webp({ quality: 80 })
+        .toBuffer();
+      
+      contentType = 'image/webp';
+      extension = '.webp';
+    } catch (error) {
+      console.error('Image conversion failed, uploading original file:', error);
+    }
+  }
+
+  const key = `${folder}/${uuidv4()}${extension}`;
 
   const command = new PutObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,
-    Body: fileBuffer,
-    ContentType: mimeType,
+    Body: bufferToUpload,
+    ContentType: contentType,
     ACL: 'public-read'
   });
 
@@ -56,4 +74,29 @@ export const uploadMultipleFiles = async (files, folder = 'items') => {
   return Promise.all(uploadPromises);
 };
 
-export default { uploadFile, uploadMultipleFiles };
+/**
+ * Delete a file from S3 using its full URL
+ * @param {string} fileUrl - The full URL of the file
+ */
+export const deleteFileFromUrl = async (fileUrl) => {
+  try {
+    if (!fileUrl.includes(BUCKET_NAME)) return; // Not an S3 url
+
+    // Extract key from URL
+    const parts = fileUrl.split(`${BUCKET_NAME}/`);
+    if (parts.length < 2) return;
+    
+    const key = parts[1];
+    
+    const command = new DeleteObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key
+    });
+    
+    await s3Client.send(command);
+  } catch (error) {
+    console.error(`Failed to delete file from S3: ${fileUrl}`, error);
+  }
+};
+
+export default { uploadFile, uploadMultipleFiles, deleteFileFromUrl };

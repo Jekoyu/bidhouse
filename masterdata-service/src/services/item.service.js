@@ -15,8 +15,8 @@ export const getAllItems = async (filters = {}) => {
   return itemRepository.findAll(filters);
 };
 
-export const getMyItems = async (userId) => {
-  return itemRepository.findByUserId(userId);
+export const getMyItems = async (userId, params) => {
+  return itemRepository.findByUserId(userId, params);
 };
 
 export const getItemDetail = async (id) => {
@@ -28,6 +28,8 @@ export const getItemDetail = async (id) => {
   }
   return item;
 };
+
+import * as uploadService from './upload.service.js';
 
 export const updateItem = async (id, data, user) => {
   const item = await itemRepository.findById(id);
@@ -49,6 +51,18 @@ export const updateItem = async (id, data, user) => {
     const error = new Error('Cannot edit approved or rejected items');
     error.statusCode = 400;
     throw error;
+  }
+
+  // If images are being updated, delete old images from S3
+  if (data.images && item.images && item.images.length > 0) {
+    // Find images that are not in the new list (deleted or replaced)
+    const newImageUrls = data.images.map(img => img.url);
+    const imagesToDelete = item.images.filter(img => !newImageUrls.includes(img.imageUrl));
+
+    // Delete from S3
+    for (const img of imagesToDelete) {
+      await uploadService.deleteFileFromUrl(img.imageUrl);
+    }
   }
 
   return itemRepository.update(id, data);
@@ -89,6 +103,13 @@ export const deleteItem = async (id, user) => {
     const error = new Error('Cannot delete approved or rejected items');
     error.statusCode = 400;
     throw error;
+  }
+
+  // Delete all images from S3
+  if (item.images && item.images.length > 0) {
+    for (const img of item.images) {
+      await uploadService.deleteFileFromUrl(img.imageUrl);
+    }
   }
 
   return itemRepository.remove(id);

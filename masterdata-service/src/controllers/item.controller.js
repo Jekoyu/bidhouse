@@ -18,8 +18,13 @@ export const getAll = async (req, res, next) => {
 
 export const getMy = async (req, res, next) => {
   try {
-    const items = await itemService.getMyItems(req.user.id);
-    res.status(200).json(successResponse('My items retrieved', items));
+    const result = await itemService.getMyItems(req.user.id, req.query);
+    res.status(200).json({
+      success: true,
+      message: 'My items retrieved',
+      data: result.data,
+      pagination: result.pagination
+    });
   } catch (error) {
     next(error);
   }

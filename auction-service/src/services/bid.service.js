@@ -41,6 +41,6 @@ export const placeBid = async (auctionId, userId, amount) => {
   });
 };
 
-export const getMyBids = async (userId) => {
-  return bidRepository.findByUserId(userId);
+export const getMyBids = async (userId, params) => {
+  return bidRepository.findByUserId(userId, params);
 };

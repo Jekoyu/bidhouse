@@ -30,14 +30,28 @@ app.use((req, res, next) => {
 });
 
 // Proxy configuration helper - only applies fixRequestBody when there's a body
+// Proxy configuration helper - only applies fixRequestBody when there's a body
+// Proxy configuration helper - only applies fixRequestBody when there's a body
 const createServiceProxy = (target) => createProxyMiddleware({
   target,
   changeOrigin: true,
   onProxyReq: (proxyReq, req, res) => {
-    // Only fix request body for methods that have body
-    if (req.body && Object.keys(req.body).length > 0) {
+    // Debug logging
+    const contentType = req.headers['content-type'];
+    const path = req.url;
+    
+    if (path.includes('/upload')) {
+        logger.info(`[Gateway Upload Debug] Path: ${path}, Content-Type: ${contentType}`);
+    }
+
+    // Only fix request body for methods that have body AND are not multipart
+    if (req.body && Object.keys(req.body).length > 0 && !contentType?.includes('multipart/form-data')) {
       fixRequestBody(proxyReq, req, res);
     }
+  },
+  onError: (err, req, res) => {
+    logger.error(`Proxy Error: ${err.message}`);
+    res.status(500).json({ success: false, message: 'Proxy Error', error: err.message });
   }
 });
 
