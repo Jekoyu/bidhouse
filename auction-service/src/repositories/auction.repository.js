@@ -15,6 +15,9 @@ export const findAll = async ({ status, page = 1, limit = 10 } = {}) => {
         bids: {
           orderBy: { bidAmount: 'desc' },
           take: 1
+        },
+        _count: {
+          select: { bids: true }
         }
       },
       orderBy: { createdAt: 'desc' },
@@ -42,6 +45,9 @@ export const findById = async (id) => {
       bids: {
         orderBy: { bidAmount: 'desc' },
         take: 1
+      },
+      _count: {
+        select: { bids: true }
       }
     }
   });

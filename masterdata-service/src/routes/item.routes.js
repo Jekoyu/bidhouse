@@ -14,6 +14,9 @@ const checkAdmin = (req, res, next) => {
   next();
 };
 
+// Internal route for inter-service communication (no auth required)
+router.get('/internal/:id', itemController.getDetail);
+
 router.get('/', authMiddleware, itemController.getAll);
 router.get('/my', authMiddleware, itemController.getMy);
 router.get('/:id', authMiddleware, itemController.getDetail);
