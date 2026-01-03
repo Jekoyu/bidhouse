@@ -49,3 +49,17 @@ export const me = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getUserById = async (req, res, next) => {
+  try {
+    const user = await authService.getProfile(req.params.id);
+    if (!user) {
+      const error = new Error('User not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    res.status(200).json(successResponse('User retrieved', user));
+  } catch (error) {
+    next(error);
+  }
+};

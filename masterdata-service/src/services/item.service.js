@@ -1,4 +1,20 @@
 import * as itemRepository from '../repositories/item.repository.js';
+import * as userService from './user.service.js';
+
+/**
+ * Enrich items with seller information
+ */
+const enrichItemsWithSeller = async (items) => {
+  if (!items || items.length === 0) return items;
+
+  const userIds = items.map(item => item.createdBy);
+  const userMap = await userService.getUsersByIds(userIds);
+
+  return items.map(item => ({
+    ...item,
+    seller: userMap.get(item.createdBy) || { id: item.createdBy, name: 'Unknown', email: 'Unknown' }
+  }));
+};
 
 export const createItem = async (data, user) => {
   // USER creates -> PENDING, ADMIN creates -> APPROVED
@@ -12,11 +28,15 @@ export const createItem = async (data, user) => {
 };
 
 export const getAllItems = async (filters = {}) => {
-  return itemRepository.findAll(filters);
+  const result = await itemRepository.findAll(filters);
+  result.data = await enrichItemsWithSeller(result.data);
+  return result;
 };
 
 export const getMyItems = async (userId, params) => {
-  return itemRepository.findByUserId(userId, params);
+  const result = await itemRepository.findByUserId(userId, params);
+  result.data = await enrichItemsWithSeller(result.data);
+  return result;
 };
 
 export const getItemDetail = async (id) => {
