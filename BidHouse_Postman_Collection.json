@@ -700,9 +700,26 @@
               { "key": "Authorization", "value": "Bearer {{admin_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/api/logs",
+              "raw": "{{base_url}}/api/logs?page=1&limit=20&service=&action=&userId=&startDate=&endDate=",
               "host": ["{{base_url}}"],
-              "path": ["api", "logs"]
+              "path": ["api", "logs"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                {
+                  "key": "service",
+                  "value": "",
+                  "description": "AUTH_SERVICE | MASTERDATA_SERVICE | AUCTION_SERVICE"
+                },
+                {
+                  "key": "action",
+                  "value": "",
+                  "description": "LOGIN | PLACE_BID | etc"
+                },
+                { "key": "userId", "value": "" },
+                { "key": "startDate", "value": "" },
+                { "key": "endDate", "value": "" }
+              ]
             }
           }
         }

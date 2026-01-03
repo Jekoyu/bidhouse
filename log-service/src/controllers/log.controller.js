@@ -12,8 +12,13 @@ export const create = async (req, res, next) => {
 
 export const getAll = async (req, res, next) => {
   try {
-    const logs = await logService.getLogs(req.query);
-    res.status(200).json(successResponse('Logs retrieved', logs));
+    const result = await logService.getLogs(req.query);
+    res.status(200).json({
+      success: true,
+      message: 'Logs retrieved',
+      data: result.data,
+      pagination: result.pagination
+    });
   } catch (error) {
     next(error);
   }

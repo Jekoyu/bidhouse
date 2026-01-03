@@ -1,5 +1,6 @@
 import * as bidRepository from '../repositories/bid.repository.js';
 import * as auctionRepository from '../repositories/auction.repository.js';
+import * as itemService from './item.service.js';
 
 export const placeBid = async (auctionId, userId, amount) => {
   const auction = await auctionRepository.findById(auctionId);
@@ -12,6 +13,14 @@ export const placeBid = async (auctionId, userId, amount) => {
 
   if (auction.status !== 'ONGOING') {
     const error = new Error('Auction is not ongoing');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Prevent bidding on own item
+  const item = await itemService.getItemById(auction.itemId);
+  if (item && item.createdBy === userId) {
+    const error = new Error('You cannot bid on your own item');
     error.statusCode = 400;
     throw error;
   }
@@ -30,9 +39,6 @@ export const placeBid = async (auctionId, userId, amount) => {
     error.statusCode = 400;
     throw error;
   }
-
-  // Prevent bidding on own item (if we knew item owner)
-  // itemOwner check usually requires fetching item from masterdata service
 
   return bidRepository.create({
     auctionId,
