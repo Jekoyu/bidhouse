@@ -2,6 +2,12 @@
 node_modules/
 bun.lockb
 
+./api-gateway/.env
+./auth-service/.env
+./auction-service/.env
+./masterdata-service/.env
+./log-service/.env
+
 # Environment variables
 .env.local
 .env.*.local
