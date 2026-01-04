@@ -32,4 +32,7 @@ router.post('/single', authMiddleware, upload.single('file'), uploadController.u
 // Multiple files upload (max 5)
 router.post('/multiple', authMiddleware, upload.array('files', 5), uploadController.uploadMultiple);
 
+// Delete file from S3
+router.delete('/', authMiddleware, uploadController.deleteFile);
+
 export default router;

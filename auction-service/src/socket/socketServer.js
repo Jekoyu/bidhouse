@@ -41,8 +41,12 @@ export const initSocketServer = (httpServer) => {
 
     // Join auction room
     socket.on('join-auction', (auctionId) => {
+      logger.info(`[DEBUG] join-auction event received from ${socket.user.id}, auctionId: ${auctionId}, type: ${typeof auctionId}`);
       socket.join(`auction:${auctionId}`);
       logger.info(`User ${socket.user.id} joined auction:${auctionId}`);
+      
+      // Confirm back to client
+      socket.emit('joined-auction', { auctionId, success: true });
     });
 
     // Leave auction room
@@ -74,18 +78,34 @@ export const getIO = () => {
  * Emit new bid to auction room
  */
 export const emitNewBid = (auctionId, bidData) => {
-  if (!io) return;
+  logger.info(`[DEBUG] emitNewBid called for auction:${auctionId}`);
+  logger.info(`[DEBUG] io object exists: ${!!io}`);
   
-  io.to(`auction:${auctionId}`).emit('auction:new-bid', {
+  if (!io) {
+    logger.error(`[DEBUG] io is NULL - WebSocket not initialized!`);
+    return;
+  }
+  
+  const room = `auction:${auctionId}`;
+  const socketsInRoom = io.sockets.adapter.rooms.get(room);
+  logger.info(`[DEBUG] Sockets in room ${room}: ${socketsInRoom?.size || 0}`);
+  
+  io.to(room).emit('auction:new-bid', {
     auctionId,
     bidId: bidData.id,
     amount: bidData.bidAmount,
     userId: bidData.userId,
+    bidder: bidData.bidder ? {
+      id: bidData.bidder.id,
+      name: bidData.bidder.name,
+      email: bidData.bidder.email
+    } : null,
     timestamp: new Date().toISOString()
   });
 
-  logger.info(`Emitted new-bid for auction:${auctionId}`);
+  logger.info(`Emitted new-bid for auction:${auctionId} by ${bidData.bidder?.name || bidData.userId}`);
 };
+
 
 /**
  * Emit outbid notification to specific user

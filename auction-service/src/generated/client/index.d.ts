@@ -41,7 +41,8 @@ export namespace $Enums {
   export const AuctionStatus: {
   SCHEDULED: 'SCHEDULED',
   ONGOING: 'ONGOING',
-  FINISHED: 'FINISHED'
+  FINISHED: 'FINISHED',
+  CANCELLED: 'CANCELLED'
 };
 
 export type AuctionStatus = (typeof AuctionStatus)[keyof typeof AuctionStatus]

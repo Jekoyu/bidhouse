@@ -1,4 +1,5 @@
 import * as bidService from '../services/bid.service.js';
+import * as userService from '../services/user.service.js';
 import { successResponse } from '../../../shared/utils/response.js';
 import { logActivity } from '../../../shared/utils/activityLogger.js';
 import { emitNewBid, emitOutbid } from '../socket/socketServer.js';
@@ -13,8 +14,14 @@ export const placeBid = async (req, res, next) => {
     
     const bid = await bidService.placeBid(auctionId, req.user.id, amount);
 
-    // Emit real-time events
-    emitNewBid(auctionId, bid);
+    // Fetch bidder info for WebSocket emission
+    const bidder = await userService.getUserById(req.user.id);
+    
+    // Emit real-time events with bidder info
+    emitNewBid(auctionId, {
+      ...bid,
+      bidder: bidder || { id: req.user.id, name: 'Unknown', email: 'Unknown' }
+    });
     
     // Notify previous highest bidder they've been outbid
     if (previousHighest && previousHighest.userId !== req.user.id) {

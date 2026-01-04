@@ -75,6 +75,7 @@ enum AuctionStatus {
   SCHEDULED
   ONGOING
   FINISHED
+  CANCELLED
 }
 
 enum TransactionStatus {

@@ -43,8 +43,8 @@ export const findById = async (id) => {
     where: { id },
     include: {
       bids: {
-        orderBy: { bidAmount: 'desc' },
-        take: 1
+        orderBy: { bidAmount: 'desc' }
+        // Removed take: 1 to return all bids
       },
       _count: {
         select: { bids: true }

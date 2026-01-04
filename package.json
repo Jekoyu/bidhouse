@@ -17,6 +17,7 @@
     "dev:auction": "cd auction-service && bun run dev",
     "dev:log": "cd log-service && bun run dev",
     "test:e2e": "bun test tests/e2e.test.js",
+    "dev:all": "bun run dev:gateway & bun run dev:auth & bun run dev:masterdata & bun run dev:auction & bun run dev:log & wait",
     "seed:all": "cd auth-service && bun run seed && cd ../masterdata-service && bun run seed",
     "migrate:fresh": "cd auth-service && bun x prisma db push --force-reset && bun run seed && cd ../masterdata-service && bun x prisma db push --force-reset && bun run seed && cd ../auction-service && bun x prisma db push --force-reset"
   },

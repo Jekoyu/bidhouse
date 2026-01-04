@@ -29,6 +29,8 @@ export const uploadFile = async (fileBuffer, originalName, mimeType, folder = 'i
   let contentType = mimeType;
   let extension = path.extname(originalName);
 
+  console.log(`[Upload] Starting upload: ${originalName}, type: ${mimeType}, folder: ${folder}`);
+
   // Auto-convert images to WebP
   if (mimeType.startsWith('image/')) {
     try {
@@ -38,8 +40,9 @@ export const uploadFile = async (fileBuffer, originalName, mimeType, folder = 'i
       
       contentType = 'image/webp';
       extension = '.webp';
+      console.log(`[Upload] Image converted to WebP`);
     } catch (error) {
-      console.error('Image conversion failed, uploading original file:', error);
+      console.error('[Upload] Image conversion failed, uploading original file:', error.message);
     }
   }
 
@@ -53,7 +56,29 @@ export const uploadFile = async (fileBuffer, originalName, mimeType, folder = 'i
     ACL: 'public-read'
   });
 
-  await s3Client.send(command);
+  try {
+    console.log(`[Upload] Sending to S3: ${BUCKET_NAME}/${key}`);
+    await s3Client.send(command);
+    console.log(`[Upload] Success: ${BUCKET_NAME}/${key}`);
+  } catch (error) {
+    console.error(`[Upload] S3 Error:`, error.message);
+    console.error(`[Upload] S3 Error Code:`, error.Code || error.code);
+    
+    // Log raw response for debugging
+    if (error.$response) {
+      console.error(`[Upload] S3 Raw Response Status:`, error.$response.statusCode);
+      if (error.$response.body) {
+        try {
+          const bodyText = await error.$response.body.transformToString();
+          console.error(`[Upload] S3 Raw Response Body:`, bodyText.substring(0, 500));
+        } catch (e) {
+          console.error(`[Upload] Could not read response body`);
+        }
+      }
+    }
+    
+    throw new Error(`Failed to upload file to S3: ${error.message}`);
+  }
 
   return {
     url: `${CDN_URL}/${BUCKET_NAME}/${key}`,

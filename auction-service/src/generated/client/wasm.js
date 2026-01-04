@@ -176,7 +176,8 @@ exports.Prisma.NullsOrder = {
 exports.AuctionStatus = exports.$Enums.AuctionStatus = {
   SCHEDULED: 'SCHEDULED',
   ONGOING: 'ONGOING',
-  FINISHED: 'FINISHED'
+  FINISHED: 'FINISHED',
+  CANCELLED: 'CANCELLED'
 };
 
 exports.TransactionStatus = exports.$Enums.TransactionStatus = {

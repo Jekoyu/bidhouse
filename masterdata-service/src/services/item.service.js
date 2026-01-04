@@ -46,7 +46,13 @@ export const getItemDetail = async (id) => {
     error.statusCode = 404;
     throw error;
   }
-  return item;
+  
+  // Enrich with seller/owner info
+  const seller = await userService.getUserById(item.createdBy);
+  return {
+    ...item,
+    seller: seller || { id: item.createdBy, name: 'Unknown', email: 'Unknown' }
+  };
 };
 
 import * as uploadService from './upload.service.js';
