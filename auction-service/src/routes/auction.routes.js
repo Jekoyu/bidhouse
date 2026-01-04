@@ -11,10 +11,13 @@ const checkAdmin = (req, res, next) => {
   next();
 };
 
-router.get('/', authMiddleware, auctionController.getAll);
+// Public routes (no auth required) - to attract users to browse
+router.get('/', auctionController.getAll);
+router.get('/:id', auctionController.getDetail);
+
+// Protected routes (requires login)
 router.get('/won', authMiddleware, auctionController.getWon);
 router.get('/participating', authMiddleware, auctionController.getParticipating);
-router.get('/:id', authMiddleware, auctionController.getDetail);
 router.post('/', authMiddleware, checkAdmin, auctionController.create);
 router.post('/:id/start', authMiddleware, checkAdmin, auctionController.start);
 router.post('/:id/finish', authMiddleware, checkAdmin, auctionController.finish);

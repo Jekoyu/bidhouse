@@ -76,6 +76,10 @@ app.use('/api/upload', jwtMiddleware);
 app.use('/api/upload', createServiceProxy(MASTERDATA_SERVICE_URL));
 
 // 3. Auction Service Routes
+// Public: GET /auctions and GET /auctions/:id (allow browsing without login)
+app.get('/api/auctions', createServiceProxy(AUCTION_SERVICE_URL));
+app.get('/api/auctions/:id', createServiceProxy(AUCTION_SERVICE_URL));
+// Protected auction routes
 app.use('/api/auctions', jwtMiddleware);
 app.use('/api/auctions', createServiceProxy(AUCTION_SERVICE_URL));
 
